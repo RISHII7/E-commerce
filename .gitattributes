@@ -1,2 +1,194 @@
-/mvnw text eol=lf
-*.cmd text eol=crlf
+# ==============================================================================
+#  Git attributes
+# ==============================================================================
+#
+#  Controls how Git treats files: line endings, diffing, merging, and what is
+#  shown or hidden in a pull request.
+#
+#  WHY THIS MATTERS ON A MIXED-PLATFORM PROJECT
+#
+#  Windows ends lines with CRLF; Linux and macOS use LF. Without rules, the same
+#  file gets committed twice with different endings and Git reports it as
+#  entirely rewritten, burying the one line that actually changed.
+#
+#  The approach here: NORMALISE ON THE WAY IN. Everything is stored in the
+#  repository as LF. Git converts to the platform convention in the working copy
+#  where it matters. A handful of file types are pinned because their endings
+#  are functionally significant rather than cosmetic.
+#
+#  Docs: https://git-scm.com/docs/gitattributes
+# ==============================================================================
+
+
+# ------------------------------------------------------------------------------
+#  Default: let Git decide what is text, and normalise it to LF when storing.
+#
+#  This single line prevents the overwhelming majority of line-ending problems.
+# ------------------------------------------------------------------------------
+*                       text=auto
+
+
+# ------------------------------------------------------------------------------
+#  Source code — always text, always LF in the repository
+# ------------------------------------------------------------------------------
+*.java                  text diff=java
+*.kt                    text diff=java
+*.groovy                text diff=java
+*.sql                   text
+*.xml                   text
+*.xsd                   text
+*.xsl                   text
+*.properties            text
+*.yml                   text
+*.yaml                  text
+*.json                  text
+*.md                    text diff=markdown
+*.txt                   text
+*.html                  text diff=html
+*.css                   text diff=css
+*.js                    text
+*.ts                    text
+
+
+# ------------------------------------------------------------------------------
+#  Files whose line endings are FUNCTIONALLY significant
+#
+#  These are not style choices. Get them wrong and the file stops working.
+# ------------------------------------------------------------------------------
+
+# Shell scripts must be LF. With CRLF, the carriage return becomes part of the
+# interpreter path on the shebang line, and the script fails with a
+# "bad interpreter: /bin/sh^M" error that gives no clue what is wrong.
+*.sh                    text eol=lf
+*.bash                  text eol=lf
+mvnw                    text eol=lf
+
+# Windows batch files must be CRLF. cmd.exe can misparse LF-only batch files,
+# particularly around labels and goto.
+*.bat                   text eol=crlf
+*.cmd                   text eol=crlf
+mvnw.cmd                text eol=crlf
+
+
+# ------------------------------------------------------------------------------
+#  Git's own configuration files
+# ------------------------------------------------------------------------------
+.gitattributes          text eol=lf
+.gitignore              text eol=lf
+.gitmessage             text eol=lf
+.editorconfig           text eol=lf
+
+
+# ------------------------------------------------------------------------------
+#  Binary files
+#
+#  Marked so Git never attempts to diff, merge or convert line endings in them.
+#  Without this, a "text" heuristic can corrupt a binary file on checkout.
+# ------------------------------------------------------------------------------
+
+# Java archives and compiled output
+*.jar                   binary
+*.war                   binary
+*.ear                   binary
+*.class                 binary
+
+# Archives
+*.zip                   binary
+*.tar                   binary
+*.gz                    binary
+*.tgz                   binary
+*.bz2                   binary
+*.7z                    binary
+*.rar                   binary
+
+# Images
+*.png                   binary
+*.jpg                   binary
+*.jpeg                  binary
+*.gif                   binary
+*.ico                   binary
+*.webp                  binary
+*.bmp                   binary
+*.tif                   binary
+*.tiff                  binary
+
+# Fonts
+*.woff                  binary
+*.woff2                 binary
+*.ttf                   binary
+*.otf                   binary
+*.eot                   binary
+
+# Documents and media
+*.pdf                   binary
+*.mp4                   binary
+*.mp3                   binary
+*.mov                   binary
+
+# Native libraries and executables
+*.so                    binary
+*.dll                   binary
+*.dylib                 binary
+*.exe                   binary
+
+# Certificates and keystores
+*.p12                   binary
+*.jks                   binary
+*.keystore              binary
+
+
+# ------------------------------------------------------------------------------
+#  SVG
+#
+#  Technically XML, so it is stored as text and diffs usefully — but it is never
+#  merged automatically, because a three-way merge of path data produces a file
+#  that parses cleanly and renders as nonsense.
+# ------------------------------------------------------------------------------
+*.svg                   text -merge
+
+
+# ------------------------------------------------------------------------------
+#  Generated and vendored content
+#
+#  linguist-generated collapses these by default in pull request diffs, so
+#  reviewer attention goes to the change rather than to hundreds of lines nobody
+#  wrote by hand. They are still fully tracked and versioned.
+# ------------------------------------------------------------------------------
+.mvn/wrapper/**         linguist-generated=true
+mvnw                    linguist-generated=true
+mvnw.cmd                linguist-generated=true
+
+
+# ------------------------------------------------------------------------------
+#  Language statistics
+#
+#  Keeps the language bar on the repository page reflecting the code that is
+#  actually written here, rather than documentation and build scripts.
+# ------------------------------------------------------------------------------
+docs/**                 linguist-documentation=true
+*.md                    linguist-documentation=true
+
+
+# ------------------------------------------------------------------------------
+#  Export rules
+#
+#  Files excluded from `git archive`, so a source tarball does not carry
+#  development-only configuration.
+# ------------------------------------------------------------------------------
+.gitattributes          export-ignore
+.gitignore              export-ignore
+.gitmessage             export-ignore
+.editorconfig           export-ignore
+.github/                export-ignore
+docs/                   export-ignore
+
+
+# ------------------------------------------------------------------------------
+#  Merge strategy
+#
+#  The changelog is edited in almost every branch, at the top of the file, so it
+#  conflicts constantly. `union` keeps both sides' lines instead of raising a
+#  conflict. The result still needs a human read before release, but it removes
+#  a conflict that is pure friction and never carries real disagreement.
+# ------------------------------------------------------------------------------
+CHANGELOG.md            merge=union

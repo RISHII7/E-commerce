@@ -1,0 +1,144 @@
+name: 🐛 Bug Report
+description: Something is broken or behaving incorrectly
+title: "fix: "
+labels: ["type: bug", "status: ready"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report this.
+
+        A good bug report is one that someone else can reproduce without asking you a single
+        follow-up question. The fields below exist to make that happen.
+
+        > ⚠️ **Found a security vulnerability?** Do **not** report it here — a public issue tells
+        > everyone how to exploit it before it can be fixed. Follow
+        > [SECURITY.md](https://github.com/RISHII7/E-commerce/blob/develop/SECURITY.md) instead.
+
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: Before you start
+      options:
+        - label: I searched existing issues and this has not already been reported
+          required: true
+        - label: I am using a supported version of the application
+          required: true
+        - label: This is not a security vulnerability
+          required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: What is happening?
+      description: Describe the problem in plain language, as if explaining it to a colleague.
+      placeholder: |
+        The product listing endpoint returns a 500 error whenever a product has no price set.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: How do we reproduce it?
+      description: >
+        Numbered steps, starting from a clean state. This is the single most valuable field in the
+        form — a bug that cannot be reproduced usually cannot be fixed.
+      placeholder: |
+        1. Start the application with `./mvnw spring-boot:run`
+        2. Create a product without a price via POST /api/products
+        3. Call GET /api/products
+        4. Observe the 500 response
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect to happen?
+      placeholder: |
+        The listing should return 200 with the product included, showing its price as null.
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: What actually happened?
+      description: Include the exact error message or response body if there is one.
+      placeholder: |
+        HTTP 500 with an empty body. The server log shows a NullPointerException.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: How severe is it?
+      options:
+        - Critical — data loss, security impact, or the service is unusable
+        - High — a major feature is broken with no workaround
+        - Medium — a feature is broken but there is a workaround
+        - Low — cosmetic or a minor inconvenience
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which area does this affect?
+      options:
+        - Not sure
+        - API — endpoints, requests, responses
+        - Domain — business rules and calculations
+        - Persistence — database, queries, migrations
+        - Security — authentication and authorisation
+        - Configuration — properties and profiles
+        - Build — Maven, dependencies, packaging
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Application version
+      description: The release tag, or the commit SHA if you are running from a branch.
+      placeholder: "v0.1.0 or 9833892"
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Output of `java -version`, plus your operating system.
+      placeholder: |
+        OS:   Windows 11 Pro 26200
+        Java: openjdk 25.0.4 2026-07-21 LTS (Temurin)
+        Run:  ./mvnw spring-boot:run
+      render: text
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs or stack trace
+      description: >
+        Paste the stack trace or log output. Please redact any credentials, tokens or personal data
+        first. This is automatically formatted as code, so no backticks are needed.
+      render: shell
+    validations:
+      required: false
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Anything else?
+      description: >
+        Screenshots, when it started happening, whether it is intermittent, anything you already
+        tried, or a guess at the cause.
+    validations:
+      required: false

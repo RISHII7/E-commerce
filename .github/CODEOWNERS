@@ -1,0 +1,97 @@
+# ==============================================================================
+#  CODEOWNERS
+# ==============================================================================
+#
+#  Declares who is responsible for which parts of this repository. GitHub reads
+#  this file and automatically requests a review from the matching owner on
+#  every pull request that touches a matching path.
+#
+#  Two things worth knowing:
+#
+#    - Rules are matched in order, and THE LAST MATCHING RULE WINS. This is the
+#      opposite of .gitignore, and is the mistake people make most often here.
+#      Put the broadest rule first and the most specific rules last.
+#
+#    - Ownership is about accountability, not permission. Anyone may propose a
+#      change to any file. The owner is simply the person who must look at it.
+#
+#  Syntax: https://docs.github.com/en/repositories/managing-your-repositories-settings-and-features/customizing-your-repository/about-code-owners
+# ==============================================================================
+
+
+# ------------------------------------------------------------------------------
+#  Default owner for everything in the repository.
+#  Every rule below this line narrows it for a specific area.
+# ------------------------------------------------------------------------------
+*                               @RISHII7
+
+
+# ------------------------------------------------------------------------------
+#  Build and dependency configuration
+#
+#  Changes here affect every single build and can introduce transitive
+#  dependencies, licence obligations and security exposure that are invisible in
+#  the diff itself. Always reviewed.
+# ------------------------------------------------------------------------------
+/pom.xml                        @RISHII7
+/mvnw                           @RISHII7
+/mvnw.cmd                       @RISHII7
+/.mvn/                          @RISHII7
+
+
+# ------------------------------------------------------------------------------
+#  Application source and tests
+# ------------------------------------------------------------------------------
+/src/main/java/                 @RISHII7
+/src/main/resources/            @RISHII7
+/src/test/                      @RISHII7
+
+
+# ------------------------------------------------------------------------------
+#  Documentation and project governance
+#
+#  These files define how the project is run. Changing them changes the rules
+#  everyone works under, so they get the same scrutiny as code.
+# ------------------------------------------------------------------------------
+/README.md                      @RISHII7
+/CHANGELOG.md                   @RISHII7
+/CONTRIBUTING.md                @RISHII7
+/CODE_OF_CONDUCT.md             @RISHII7
+/SECURITY.md                    @RISHII7
+/SUPPORT.md                     @RISHII7
+/LICENSE                        @RISHII7
+/docs/                          @RISHII7
+
+
+# ------------------------------------------------------------------------------
+#  GitHub configuration
+#
+#  Issue forms, the pull request template, this file, and any future workflows.
+#  A change here silently alters how collaboration works for everyone.
+# ------------------------------------------------------------------------------
+/.github/                       @RISHII7
+/.github/CODEOWNERS             @RISHII7
+/.github/workflows/             @RISHII7
+
+
+# ------------------------------------------------------------------------------
+#  Shared tooling
+#
+#  Files that change how everyone's editor and Git behave.
+# ------------------------------------------------------------------------------
+/.editorconfig                  @RISHII7
+/.gitattributes                 @RISHII7
+/.gitignore                     @RISHII7
+/.gitmessage                    @RISHII7
+
+
+# ==============================================================================
+#  As the project grows, ownership splits by area rather than by person, e.g.
+#
+#    /src/main/java/com/app/ecom/catalog/    @RISHII7 @catalog-team
+#    /src/main/java/com/app/ecom/payment/    @RISHII7 @payments-team
+#    /src/main/java/com/app/ecom/auth/       @RISHII7 @security-team
+#
+#  Keeping the structure here from the start means that split is a one-line
+#  change later rather than a redesign.
+# ==============================================================================

@@ -267,6 +267,23 @@ git push origin develop
 on `main` at that point. Without the back-merge they are absent from `develop`, which means the next
 release quietly reintroduces the bugs you just fixed.
 
+> [!IMPORTANT]
+> **`develop` is protected, so the back-merge cannot be pushed directly.** The commands above show
+> the classic Git Flow sequence. In this repository the back-merge travels through a pull request
+> like everything else:
+>
+> ```bash
+> git checkout -b chore/back-merge-v0.2.0 main
+> # bump pom.xml to the next -SNAPSHOT here as well
+> git commit -am "chore: back-merge the 0.2.0 release and open the 0.3.0 iteration"
+> git push -u origin chore/back-merge-v0.2.0
+> gh pr create --base develop
+> ```
+>
+> This is not a workaround. Branch protection exists precisely so that no commit reaches a permanent
+> branch unreviewed, and a release back-merge is no exception — it is the moment a version bump and
+> any last-minute stabilisation fixes enter the next development cycle.
+
 ---
 
 ## Scenario: emergency hotfix

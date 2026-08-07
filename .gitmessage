@@ -1,0 +1,77 @@
+
+
+# ==============================================================================
+#  <type>(<scope>): <subject>
+#
+#  Write the subject line above this block, then a BLANK LINE, then the body.
+#  Everything starting with # is stripped automatically.
+# ==============================================================================
+#
+# SUBJECT LINE
+#   - Imperative mood: "add", "fix", "remove" — not "added" or "adds".
+#     Test: "If applied, this commit will <subject>".
+#   - Lower case, no full stop at the end.
+#   - The whole line, including type and scope, must fit in 72 characters.
+#   - Describe the outcome, not the activity.
+#
+# TYPES
+#   feat      A capability that did not exist before          -> MINOR
+#   fix       Correcting behaviour that was wrong             -> PATCH
+#   docs      Documentation only
+#   style     Formatting only, no behaviour change at all
+#   refactor  Restructuring with IDENTICAL observable behaviour
+#   perf      Measurably faster or lighter                    -> PATCH
+#   test      Adding or correcting tests
+#   build     Build system, Maven, dependencies, packaging
+#   ci        Continuous integration configuration
+#   chore     Housekeeping, no source or test change
+#   revert    Undoing a commit; say which one and why
+#
+# SCOPES (optional — omit if the change is project-wide)
+#   catalog  inventory  cart     order    payment  account
+#   auth     api        persistence       config   deps
+#   docs     release
+#
+# ------------------------------------------------------------------------------
+#
+# BODY  (wrap at 72 columns — the ruler below is exactly 72 wide)
+# 123456789012345678901234567890123456789012345678901234567890123456789012
+#
+#   The body is the point. Explain WHY, not WHAT — the diff already shows
+#   what changed, and can never show why.
+#
+#   A good body answers, roughly in this order:
+#     1. What was the situation before? What was broken or missing?
+#     2. Why does it need to change? What does leaving it alone cost?
+#     3. What approach was taken, and why that one over the alternatives?
+#     4. What consequences would surprise a future reader?
+#
+#   A one-line commit is acceptable only for genuinely trivial changes,
+#   such as fixing a typo. If you cannot think of anything to write, ask
+#   whether the subject really is self-evident. Usually it is not.
+#
+# ------------------------------------------------------------------------------
+#
+# BREAKING CHANGES
+#   Signal them TWICE:
+#     1. A "!" before the colon:   feat(api)!: <subject>
+#     2. A footer explaining impact and the migration path:
+#          BREAKING CHANGE: <what breaks and what consumers must do>
+#
+# FOOTERS
+#   Closes #12                     closes the issue when merged
+#   Fixes #12                      same, conventionally used for bugs
+#   Refs #12                       references without closing
+#   Co-authored-by: Name <email>
+#
+# ------------------------------------------------------------------------------
+#
+# BEFORE COMMITTING
+#   [ ] ./mvnw clean verify passes
+#   [ ] Tests cover the new or changed behaviour
+#   [ ] CHANGELOG.md [Unreleased] updated if behaviour changed
+#   [ ] Only files related to this one issue are staged
+#   [ ] No secrets, credentials, tokens or personal data
+#
+# Full specification: docs/COMMIT_CONVENTION.md
+# ==============================================================================

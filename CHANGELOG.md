@@ -56,6 +56,26 @@ empty `[Unreleased]` section is opened above it.
 - **`LICENSE`** — the **MIT Licence**, giving anyone explicit permission to use, modify and
   distribute the code. Without it the code would legally be all-rights-reserved by default, meaning
   nobody could use it at all.
+- **`CONTRIBUTING.md`** — the single entry point for anyone changing this codebase. Covers
+  environment and IDE setup, the full life of a change from issue to merge, branch naming, commit
+  rules, changelog expectations, pull request quality, review etiquette for both author and reviewer,
+  merge strategies, and a definition of done.
+- **`docs/BRANCHING.md`** — the Git Flow model as this project applies it: both permanent branches
+  and what each guarantees, all four supporting branch types with where they are cut from and merge
+  back to, a flow diagram, exact command sequences for building a feature, cutting a release and
+  shipping a hotfix, merge strategy per target branch, the protection rules currently in force, and
+  the rules that are never broken.
+- **`docs/COMMIT_CONVENTION.md`** — the Conventional Commits specification adopted here, with one
+  deliberate addition: commit bodies are expected to be substantial. Documents the message anatomy,
+  every allowed type and scope, subject and body rules, how breaking changes are signalled twice,
+  issue-linking footers, four fully worked examples, and how to correct a bad message safely.
+- **`docs/VERSIONING.md`** — how versions are chosen and releases are produced. Defines exactly what
+  counts as the public API of this service, what makes a change major, minor or patch, the special
+  rules of the `0.x` phase, how commit types map to version bumps, the annotated-tag convention, a
+  nine-step release checklist, the hotfix path, and the release-notes structure.
+- **`.gitmessage`** — a commit template wired into the editor via `git config commit.template`, so
+  the rules appear at the moment a commit is written rather than in a document nobody re-reads. It
+  includes a 72-column ruler, the full type and scope reference, and a pre-commit checklist.
 
 ### Fixed
 

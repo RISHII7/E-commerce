@@ -45,7 +45,7 @@ empty `[Unreleased]` section is opened above it.
 
 ### Added
 
-- **Spring Boot 4.1.0 application scaffold** targeting **Java 26**, with Spring Web MVC for building
+- **Spring Boot 4.1.0 application scaffold** targeting **Java 25 (LTS)**, with Spring Web MVC for building
   the REST API, Lombok to remove boilerplate, and JUnit 5 with Spring Test for automated testing.
   The **Maven Wrapper** is included so the project builds with an identical Maven version on every
   machine without anyone installing Maven first.
@@ -56,6 +56,19 @@ empty `[Unreleased]` section is opened above it.
 - **`LICENSE`** — the **MIT Licence**, giving anyone explicit permission to use, modify and
   distribute the code. Without it the code would legally be all-rights-reserved by default, meaning
   nobody could use it at all.
+
+### Fixed
+
+- **The project would not compile at all.** Spring Initializr had set the build to target **Java 26**,
+  which was simply the newest entry in the generator's dropdown rather than a deliberate choice.
+  No Java 26 runtime was installed, and a compiler can only target its own version or older — never
+  newer — so every build failed before it began.
+
+  The build now targets **Java 25**, the current Long Term Support release. LTS was chosen over
+  staying on 26 because a short-term release is supported for roughly six months, and a project that
+  expects to reach production should not need a runtime upgrade twice a year to stay supported.
+  Verified against **Eclipse Temurin 25.0.4+7**, a vendor-neutral build that is free for production
+  use and is what most CI images ship by default.
 
 ---
 

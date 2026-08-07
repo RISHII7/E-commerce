@@ -2,13 +2,13 @@
 
 # 🛒 E-Commerce Service
 
-**A production-minded e-commerce backend built with Spring Boot 4 and Java 26.**
+**A production-minded e-commerce backend built with Spring Boot 4 and Java 25 (LTS).**
 
 *Engineered under a strict Git Flow workflow, Conventional Commits, semantic versioning and a hand-curated changelog — because how software is built matters as much as what is built.*
 
 <br />
 
-[![Java](https://img.shields.io/badge/Java-26-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)](https://openjdk.org/projects/jdk/26/)
+[![Java](https://img.shields.io/badge/Java-25%20LTS-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)](https://openjdk.org/projects/jdk/25/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.0-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
 [![Maven](https://img.shields.io/badge/Maven-Wrapper-C71A36?style=for-the-badge&logo=apachemaven&logoColor=white)](https://maven.apache.org/wrapper/)
 [![License](https://img.shields.io/badge/License-MIT-3DA639?style=for-the-badge)](LICENSE)
@@ -67,7 +67,7 @@ documentation, not as an afterthought.
 
 | Technology | Version | Why it is here |
 | :--- | :--- | :--- |
-| **Java** | 26 | The language and runtime. A current LTS-track release gives access to modern language features and the newest JVM performance work. |
+| **Java** | 25 (LTS) | The language and runtime. Java 25 is the current Long Term Support release, so it stays supported for years rather than the roughly six months a short-term release receives. Built and verified against [Eclipse Temurin 25](https://adoptium.net/temurin/releases/?version=25). |
 | **Spring Boot** | 4.1.0 | Application framework. Handles dependency injection, configuration, auto-wiring and packaging so the project can focus on domain logic. |
 | **Spring Web MVC** | via starter | Builds the REST API — controllers, request mapping, content negotiation and the embedded web server. |
 | **Lombok** | managed by Spring Boot | Removes boilerplate such as getters, setters, constructors and builders, keeping domain classes readable. |
@@ -82,7 +82,7 @@ documentation, not as an afterthought.
 
 | Requirement | Minimum | How to check |
 | :--- | :--- | :--- |
-| **JDK** | 26 | `java -version` |
+| **JDK** | 25 | `java -version` |
 | **Git** | 2.30+ | `git --version` |
 | **Maven** | *not required* | The bundled Maven Wrapper downloads the correct version automatically. |
 

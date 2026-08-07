@@ -246,6 +246,12 @@ git merge --no-ff main -m "chore: back-merge the 0.2.0 release into develop"
 Without this, the version bump and every stabilisation fix exist only on `main`, and the next release
 quietly reintroduces the bugs you just fixed.
 
+> [!IMPORTANT]
+> `develop` is protected, so this cannot be pushed directly. In practice the back-merge is carried on
+> a short-lived `chore/back-merge-vX.Y.Z` branch cut from `main`, which also carries the next
+> `-SNAPSHOT` bump from step 8, and is merged into `develop` through a pull request. See
+> [BRANCHING.md](BRANCHING.md#scenario-cutting-a-release).
+
 ### 8. Open the next iteration
 
 - `pom.xml`: `0.2.0` → `0.3.0-SNAPSHOT`

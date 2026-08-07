@@ -43,7 +43,36 @@ empty `[Unreleased]` section is opened above it.
 
 ## [Unreleased]
 
-Nothing yet. Changes merged into `develop` after `0.1.0` will be listed here.
+### Added
+
+- **The service now does something.** `v0.1.0` contained no application functionality at all — every
+  path returned a 404 because there was not a single controller in the codebase. There is now a
+  working REST endpoint.
+- **`GET /api/users`** returns every user the service currently holds, as a JSON array.
+
+  When there are no users it returns `200 OK` with `[]`, rather than a `404` or an empty body.
+  *"Show me all users"* is a question with a valid answer when the answer is none, and returning an
+  error for it would force every client to special-case something that is not exceptional.
+- **`POST /api/users`** accepts a JSON body and adds a user, so the listing endpoint can actually be
+  exercised. Note that it currently responds `200 OK` and returns the **entire collection** rather
+  than `201 Created` with just the new user — this is recorded as follow-up work rather than
+  presented as the intended final shape.
+- **A `User` model** holding `id`, `firstName` and `lastName`, with Lombok's `@Data` generating the
+  getters, setters, `equals`, `hashCode` and `toString`.
+
+### Known limitations
+
+These are **deliberate scope limits** on a first vertical slice, not oversights. Each is tracked as
+its own follow-up issue:
+
+- **Nothing is persisted.** Users are held in an in-memory list and are lost when the application
+  stops. There is no database yet.
+- **Not safe under concurrent load.** Spring shares a single controller instance across all requests,
+  and the plain `ArrayList` backing it is not built to be written to from several threads at once.
+- **No validation and no id generation.** A request with no name, or a duplicate id, is accepted
+  exactly as sent; sending no id leaves it `null`.
+- **No layering.** The controller and model sit in the root package with no service layer between
+  them.
 
 ---
 

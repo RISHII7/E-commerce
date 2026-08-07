@@ -90,6 +90,34 @@ empty `[Unreleased]` section is opened above it.
   configuration, application source, governance documents, GitHub configuration and shared tooling.
   It documents the rule people most often get wrong — that the **last** matching rule wins, the
   opposite of `.gitignore` — and sketches how ownership splits by area as the project grows.
+- **`CODE_OF_CONDUCT.md`** — the Contributor Covenant v2.1, with a four-stage enforcement ladder and
+  a reporting route that stays private without publishing anyone's personal email address.
+- **`SECURITY.md`** — a responsible disclosure policy. Vulnerabilities are reported through **GitHub
+  Private Vulnerability Reporting**, never a public issue, because a public report tells everyone how
+  to exploit the problem before a fix exists. States which versions are supported, what to include in
+  a report, target response times, the coordinated disclosure process, and an explicit scope list so
+  reporters know in advance what will and will not be accepted. Closes with security rules for
+  contributors — most importantly that a secret committed to Git is permanently in the history and
+  must be **rotated**, not merely deleted.
+- **`SUPPORT.md`** — routes people to documentation, Discussions or the issue tracker depending on
+  what they actually need, and explains what makes a question answerable.
+- **`.editorconfig`** — a shared formatting baseline honoured automatically by IntelliJ, VS Code,
+  Visual Studio, Vim and most other editors: UTF-8, LF endings, a final newline, trimmed trailing
+  whitespace, four-space indentation for Java and two for XML, YAML and JSON. Markdown is deliberately
+  exempt from whitespace trimming, because two trailing spaces are its hard line break and trimming
+  them silently changes how a document renders.
+
+### Changed
+
+- **`.gitattributes` replaced with a comprehensive ruleset.** The generated file was two lines. It
+  now normalises all text to LF inside the repository so the same file never appears rewritten purely
+  because of line endings, and pins the cases where endings are *functionally* significant: `.sh` and
+  `mvnw` are forced to LF, because a shell script with CRLF fails on Linux with a `bad interpreter`
+  error caused by the carriage return becoming part of the interpreter path; `.bat` and `.cmd` are
+  forced to CRLF, because `cmd.exe` can misparse LF-only batch files. Binary types are marked so Git
+  stops trying to diff or line-ending-convert them, the Maven Wrapper is marked as generated so it
+  collapses in pull request reviews, and `CHANGELOG.md` uses a union merge so the file that every
+  branch edits stops producing conflicts that never carry real disagreement.
 
 ### Fixed
 

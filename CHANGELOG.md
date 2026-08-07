@@ -76,6 +76,20 @@ empty `[Unreleased]` section is opened above it.
 - **`.gitmessage`** — a commit template wired into the editor via `git config commit.template`, so
   the rules appear at the moment a commit is written rather than in a document nobody re-reads. It
   includes a 72-column ruler, the full type and scope reference, and a pre-commit checklist.
+- **Four structured GitHub issue forms** — bug report, feature request, engineering task and
+  documentation issue. These are YAML *forms* rather than Markdown templates, because forms can mark
+  fields as required and therefore actually guarantee that a report arrives with reproduction steps,
+  an environment and a version rather than a sentence. Each applies its own default labels.
+- **Issue template configuration** that disables blank issues and routes open-ended questions to
+  Discussions, vulnerability reports to GitHub Security Advisories, and setup questions to the
+  documentation — so the issue tracker holds actionable work only.
+- **Pull request template** prompting for a plain-language summary, the linked issue, the type of
+  change, what was actually run to test it, breaking-change impact with a migration path, and a
+  three-part self-review checklist covering the change, the process and quality.
+- **`CODEOWNERS`** so reviewers are requested automatically, with separate ownership for build
+  configuration, application source, governance documents, GitHub configuration and shared tooling.
+  It documents the rule people most often get wrong — that the **last** matching rule wins, the
+  opposite of `.gitignore` — and sketches how ownership splits by area as the project grows.
 
 ### Fixed
 

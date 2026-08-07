@@ -1,0 +1,67 @@
+name: 📚 Documentation
+description: Documentation that is wrong, missing, or hard to follow
+title: "docs: "
+labels: ["type: docs", "status: ready"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Documentation problems are real problems. If someone had to work something out by reading
+        the source, or by trial and error, the documentation failed and it is worth fixing.
+
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What is wrong with it?
+      options:
+        - Incorrect — it says something that is not true
+        - Outdated — it was true once, but the code has moved on
+        - Missing — there is nothing written about this at all
+        - Unclear — it is technically correct but hard to follow
+        - Broken link or formatting
+        - Typo or grammar
+    validations:
+      required: true
+
+  - type: input
+    id: location
+    attributes:
+      label: Where is it?
+      description: File path, or a link to the exact section.
+      placeholder: "docs/BRANCHING.md, the 'Scenario: cutting a release' section"
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What is the problem?
+      description: What does it currently say, and why is that a problem?
+      placeholder: |
+        The release checklist says to tag before merging into main. That is the wrong order — the
+        tag has to point at the merge commit, so it can only be created after the merge. Following
+        the steps as written produces a tag on the wrong commit.
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: What should it say instead?
+      description: A concrete suggestion if you have one. Leave it blank if you are only flagging it.
+    validations:
+      required: false
+
+  - type: dropdown
+    id: audience
+    attributes:
+      label: Who does this affect?
+      options:
+        - Anyone contributing to the project
+        - Anyone consuming the API
+        - Maintainers only
+        - Someone setting the project up for the first time
+    validations:
+      required: true

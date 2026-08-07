@@ -109,6 +109,19 @@ empty `[Unreleased]` section is opened above it.
 
 ### Changed
 
+- **Maven project metadata completed.** Spring Initializr leaves `name`, `description`, `url`,
+  `licenses`, `developers` and `scm` behind as empty placeholder elements. All are now filled in with
+  real values, and `inceptionYear`, `organization` and `issueManagement` were added.
+
+  The empty `<license/>` element mattered most: it was **worse than declaring nothing at all**,
+  because licence-scanning tooling reads an empty licence as *unknown* rather than *unspecified*, and
+  an unknown licence fails compliance checks. The declared MIT licence now matches the `LICENSE` file
+  exactly.
+
+  No dependency, version or plugin behaviour was altered.
+- **Project version corrected from `0.0.1-SNAPSHOT` to `0.1.0-SNAPSHOT`.** The generator's default
+  did not match the version this work is building towards, and `docs/VERSIONING.md` requires
+  `develop` to carry the `-SNAPSHOT` of its target version.
 - **`.gitattributes` replaced with a comprehensive ruleset.** The generated file was two lines. It
   now normalises all text to LF inside the repository so the same file never appears rewritten purely
   because of line endings, and pins the cases where endings are *functionally* significant: `.sh` and

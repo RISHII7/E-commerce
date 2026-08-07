@@ -1,0 +1,93 @@
+name: 🔧 Engineering Task
+description: Internal work that is neither a bug nor a user-facing feature
+title: "chore: "
+labels: ["type: chore", "status: ready"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this for engineering work that nobody outside the team would notice directly:
+        refactoring, dependency upgrades, build changes, test coverage, tooling, technical debt.
+
+        Work still deserves an issue even when it has no user-visible outcome. Undocumented work is
+        indistinguishable from no work when someone looks back at the history.
+
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What kind of task is this?
+      options:
+        - Refactor — restructuring with identical behaviour
+        - Dependency upgrade
+        - Build or packaging change
+        - Test coverage
+        - Performance
+        - Tooling or developer experience
+        - Technical debt
+        - Documentation infrastructure
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: >
+        What is the situation today, and why does it need attention? What does leaving it alone
+        cost — in bugs, in time, or in risk?
+      placeholder: |
+        Order total calculation is duplicated across OrderService and CartService. The two copies
+        have already drifted once, producing different rounding in the cart and on the invoice.
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: What needs to be done?
+      description: A checklist of the concrete work.
+      placeholder: |
+        - [ ] Extract the calculation into a shared MoneyCalculator
+        - [ ] Point both services at it
+        - [ ] Add tests covering the rounding case that previously differed
+        - [ ] Delete both old implementations
+    validations:
+      required: true
+
+  - type: textarea
+    id: out-of-scope
+    attributes:
+      label: What is explicitly out of scope?
+      description: >
+        Naming what this task is *not* is one of the most effective ways to stop it quietly growing
+        into something three times the size.
+      placeholder: |
+        Changing the rounding rule itself. This task only removes the duplication; if the rule is
+        wrong, that is a separate issue.
+    validations:
+      required: false
+
+  - type: dropdown
+    id: risk
+    attributes:
+      label: How risky is this change?
+      options:
+        - Low — isolated, well covered by tests
+        - Medium — touches shared code, needs careful review
+        - High — touches core behaviour or data, needs a rollback plan
+    validations:
+      required: true
+
+  - type: textarea
+    id: done
+    attributes:
+      label: Definition of done
+      placeholder: |
+        - [ ] `./mvnw clean verify` passes
+        - [ ] No behaviour change observable through the API
+        - [ ] Both former implementations are gone, not just unused
+    validations:
+      required: true

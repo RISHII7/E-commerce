@@ -10,24 +10,88 @@
 	</parent>
 	<groupId>com.app</groupId>
 	<artifactId>ecom-application</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<name/>
-	<description/>
-	<url/>
+
+	<!--
+		Version policy (see docs/VERSIONING.md):
+		  develop    X.Y.Z-SNAPSHOT   the version being worked towards
+		  release/*  X.Y.Z            the exact version being shipped
+		  main       X.Y.Z            always matches the tag on that commit
+		A -SNAPSHOT is never released and never tagged.
+	-->
+	<version>0.1.0</version>
+
+	<name>E-Commerce Service</name>
+	<description>
+		Backend service for an online store, built with Spring Boot 4 and Java 25.
+		Provides the REST API behind the product catalogue, inventory, carts, orders,
+		payments and customer accounts.
+	</description>
+	<url>https://github.com/RISHII7/E-commerce</url>
+	<inceptionYear>2026</inceptionYear>
+
+	<organization>
+		<name>RISHII7</name>
+		<url>https://github.com/RISHII7</url>
+	</organization>
+
+	<!--
+		Declared licence must match the LICENSE file at the repository root.
+		An empty <license/> element is worse than declaring nothing at all,
+		because licence-scanning tools read it as UNKNOWN rather than
+		UNSPECIFIED, which fails compliance checks.
+	-->
 	<licenses>
-		<license/>
+		<license>
+			<name>MIT License</name>
+			<url>https://opensource.org/licenses/MIT</url>
+			<distribution>repo</distribution>
+			<comments>
+				A permissive licence. The software may be used, copied, modified and
+				distributed, including commercially, provided the copyright notice and
+				licence text are retained.
+			</comments>
+		</license>
 	</licenses>
+
 	<developers>
-		<developer/>
+		<developer>
+			<id>RISHII7</id>
+			<name>Rishikesh Palande</name>
+			<url>https://github.com/RISHII7</url>
+			<organization>RISHII7</organization>
+			<organizationUrl>https://github.com/RISHII7</organizationUrl>
+			<roles>
+				<role>Maintainer</role>
+				<role>Developer</role>
+			</roles>
+			<timezone>Asia/Kolkata</timezone>
+		</developer>
 	</developers>
+
+	<!--
+		Tells Maven, IDEs and dependency scanners where the source lives.
+		<tag> stays as HEAD during development; release tooling replaces it
+		with the actual tag when a release is cut.
+	-->
 	<scm>
-		<connection/>
-		<developerConnection/>
-		<tag/>
-		<url/>
+		<connection>scm:git:https://github.com/RISHII7/E-commerce.git</connection>
+		<developerConnection>scm:git:ssh://git@github.com/RISHII7/E-commerce.git</developerConnection>
+		<tag>HEAD</tag>
+		<url>https://github.com/RISHII7/E-commerce</url>
 	</scm>
+
+	<issueManagement>
+		<system>GitHub Issues</system>
+		<url>https://github.com/RISHII7/E-commerce/issues</url>
+	</issueManagement>
 	<properties>
-		<java.version>26</java.version>
+		<!--
+			Java 25 is the current Long Term Support release. Spring Boot 4.1
+			supports it fully, and an LTS line keeps the project on a supported
+			runtime for years rather than the ~6 months a short-term release gets.
+			Build and verify with Eclipse Temurin 25 or any other JDK 25 build.
+		-->
+		<java.version>25</java.version>
 	</properties>
 	<dependencies>
 		<dependency>

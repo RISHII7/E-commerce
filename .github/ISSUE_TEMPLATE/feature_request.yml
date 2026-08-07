@@ -1,0 +1,122 @@
+name: ✨ Feature Request
+description: Propose a new capability for the service
+title: "feat: "
+labels: ["type: feature", "status: ready"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for proposing this.
+
+        This form deliberately asks for **the problem before the solution**. The first idea for
+        solving a problem is rarely the best one, and a request framed as "add this button" throws
+        away the information needed to find a better answer.
+
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: Before you start
+      options:
+        - label: I searched existing issues and discussions, and this has not already been proposed
+          required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: >
+        Describe the situation as it is today and why it is a problem. Who is affected, and what
+        does it cost them? Please do not describe your solution here — that comes next.
+      placeholder: |
+        Customers browsing the catalogue have to page through every product to find one within
+        their budget. On a catalogue of any size this makes the listing effectively unusable, and
+        it comes up repeatedly in support conversations.
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: What would you like to happen?
+      description: Your proposed solution, and roughly how you imagine it working.
+      placeholder: |
+        Add optional minPrice and maxPrice query parameters to GET /api/products. Both optional, so
+        passing only one still narrows the results.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: What alternatives did you consider?
+      description: >
+        Other approaches you thought about and why you set them aside. This is genuinely useful —
+        it stops reviewers re-treading ground you have already covered.
+      placeholder: |
+        - Client-side filtering: rejected, the client would still need to download every product.
+        - A separate /search endpoint: rejected as overkill for two parameters, and it would split
+          listing logic across two places.
+    validations:
+      required: false
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which area does this belong to?
+      options:
+        - Not sure
+        - Catalogue — products, categories, search
+        - Inventory — stock and availability
+        - Cart — shopping cart behaviour
+        - Orders — checkout and fulfilment
+        - Payments — processing and refunds
+        - Accounts — customers and profiles
+        - Security — authentication and authorisation
+        - API — cross-cutting REST concerns
+        - Tooling — build, docs, developer experience
+    validations:
+      required: true
+
+  - type: dropdown
+    id: importance
+    attributes:
+      label: How important is this to you?
+      options:
+        - Blocking — I cannot use the service without it
+        - Important — there is a workaround, but it is painful
+        - Nice to have — it would be an improvement
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: How would we know it is done?
+      description: >
+        Concrete, checkable statements. If you are not sure, leave it — a maintainer will fill it
+        in when the issue is picked up.
+      placeholder: |
+        - [ ] GET /api/products accepts optional minPrice and maxPrice
+        - [ ] Passing only one parameter still narrows results
+        - [ ] A minimum greater than the maximum returns 400, not an empty list
+        - [ ] Filtering happens in the database query, not in memory
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: breaking
+    attributes:
+      label: Compatibility
+      options:
+        - label: This would change existing behaviour in a way that could break current consumers
+          required: false
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Anything else?
+      description: Mockups, links to how other services solve this, or related issues.
+    validations:
+      required: false

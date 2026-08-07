@@ -1,0 +1,33 @@
+# Blank issues are disabled deliberately.
+#
+# An issue tracker is only useful if everything in it is actionable. Blank issues arrive missing
+# the information needed to act on them, and the cost of chasing that information later is far
+# higher than the small friction of picking a template now.
+#
+# Anything that is genuinely not a bug, a feature, a task or a documentation problem belongs in
+# Discussions, which is linked below.
+blank_issues_enabled: false
+
+contact_links:
+  - name: 💬 Ask a question or start a discussion
+    url: https://github.com/RISHII7/E-commerce/discussions
+    about: >
+      Open-ended questions, ideas that are not yet a concrete proposal, help with setup, or anything
+      you are not sure how to file. Nothing here is off-topic.
+
+  - name: 🔒 Report a security vulnerability
+    url: https://github.com/RISHII7/E-commerce/security/advisories/new
+    about: >
+      Report privately through GitHub Security Advisories. Never open a public issue for a
+      vulnerability — it tells everyone how to exploit it before it can be fixed.
+
+  - name: 📖 Read the documentation first
+    url: https://github.com/RISHII7/E-commerce#readme
+    about: >
+      Setup, the branching model, the commit convention and the release process are all documented.
+      Your answer may already be there.
+
+  - name: 🤝 How to contribute
+    url: https://github.com/RISHII7/E-commerce/blob/develop/CONTRIBUTING.md
+    about: >
+      The full path a change travels, from picking up an issue to seeing it merged.

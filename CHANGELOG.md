@@ -43,6 +43,23 @@ empty `[Unreleased]` section is opened above it.
 
 ## [Unreleased]
 
+Nothing yet. Changes merged into `develop` after `0.1.0` will be listed here.
+
+---
+
+## [0.1.0] — 2026-08-07
+
+**Repository Foundation.**
+
+This first tagged release contains **no application functionality**. Its entire purpose is to turn a
+bare Spring Initializr scaffold into a repository that can be worked on properly — with a defined
+branching model, enforced review, structured collaboration, community policies, and documentation
+that explains itself.
+
+Everything built from this point forward inherits these rules. There is nothing here for an end user
+to install or call; the audience for this release is anyone who will contribute to the project,
+including its future maintainer.
+
 ### Added
 
 - **Spring Boot 4.1.0 application scaffold** targeting **Java 25 (LTS)**, with Spring Web MVC for building
@@ -145,8 +162,20 @@ empty `[Unreleased]` section is opened above it.
   Verified against **Eclipse Temurin 25.0.4+7**, a vendor-neutral build that is free for production
   use and is what most CI images ship by default.
 
+### Security
+
+- **`main`, `develop` and every `v*` tag are protected by GitHub rulesets.** Force pushes and branch
+  deletion are blocked outright, every change must arrive through a pull request, review
+  conversations must be resolved before merging, stale approvals are dismissed when new commits are
+  pushed, and published release tags can never be moved or deleted. This is what makes the history
+  genuinely append-only and makes a version tag mean the same thing permanently.
+- **A private vulnerability disclosure route now exists.** Before this release there was no way to
+  report a security problem except a public issue, which would have told everyone how to exploit it
+  before a fix could ship.
+
 ---
 
 <!-- Comparison links -->
 
-[Unreleased]: https://github.com/RISHII7/E-commerce/commits/develop
+[Unreleased]: https://github.com/RISHII7/E-commerce/compare/v0.1.0...develop
+[0.1.0]: https://github.com/RISHII7/E-commerce/releases/tag/v0.1.0

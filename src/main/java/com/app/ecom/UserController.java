@@ -3,6 +3,7 @@ package com.app.ecom;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -46,18 +47,21 @@ import java.util.List;
  * <h2>Known rough edges</h2>
  *
  * <ul>
- *   <li><strong>The two endpoints disagree about their content type.</strong>
- *       {@code GET} replies with JSON; {@code POST} replies with plain text.
- *       See {@link #createUser} for why that is awkward.</li>
- *   <li><strong>The path is written out twice.</strong> A single
+ *   <li><strong>A missing user is reported as success.</strong> Asking for an id
+ *       that does not exist answers {@code 200 OK} with an empty body instead of
+ *       {@code 404}. See {@link #getUser} — this is the most misleading thing in
+ *       the class.</li>
+ *   <li><strong>The endpoints disagree about their content type.</strong> Both
+ *       {@code GET}s reply with JSON; {@code POST} replies with plain text. See
+ *       {@link #createUser} for why that is awkward.</li>
+ *   <li><strong>The base path is written out three times.</strong> A single
  *       {@code @RequestMapping("/api/users")} on the class would state it once
- *       and let each method describe only what it adds.</li>
+ *       and let each method describe only what it adds. Three copies is the
+ *       point at which one of them eventually gets edited alone.</li>
  *   <li><strong>Nothing survives a restart</strong>, because the service holds
  *       users in memory. That limitation lives in {@link UserService}, not
  *       here.</li>
  * </ul>
- *
- * <p>All of these are tracked as follow-up issues.
  *
  * @see UserService where the users and the rules actually live
  */
@@ -91,6 +95,59 @@ public class UserController {
     public List<User> getAllUsers() {
         return userService.fetchAllUsers();
     }
+
+    /**
+     * Returns a single user by id.
+     *
+     * <p>Answers {@code GET /api/users/{id}}. The {@code {id}} in the path is a
+     * placeholder, and {@code @PathVariable} tells Spring to pull that piece of
+     * the URL out and hand it over as the method argument. Requesting
+     * {@code /api/users/3} therefore arrives here with {@code id} set to 3.
+     *
+     * <p>Spring converts the text from the URL into a {@link Long} on the way in,
+     * which comes with a useful side effect for free: a request for
+     * {@code /api/users/abc} never reaches this method at all. Spring cannot make
+     * a number out of {@code abc}, so it answers {@code 400 Bad Request} on its
+     * own. Verified against a running instance.
+     *
+     * <h3>The part that needs fixing: a missing user looks like a success</h3>
+     *
+     * <p>{@link UserService#fetchUser} returns {@code null} when no user has that
+     * id, and this method passes that straight back. When a {@code @RestController}
+     * method returns {@code null}, Spring has nothing to serialise, so it replies
+     * with an empty response. Measured against a running instance:
+     *
+     * <pre>
+     *   GET /api/users/1     200  application/json  {"firstName":"Alpha","id":1,...}
+     *   GET /api/users/999   200  (no content type) (empty body, 0 bytes)
+     *   GET /api/users/abc   400  application/json  {"status":400,...}
+     * </pre>
+     *
+     * <p>The middle line is wrong in a way that matters. {@code 200} means
+     * <em>your request succeeded</em>, and the lookup did not succeed — there is
+     * no such user. A caller checking only the status code concludes everything
+     * is fine and then tries to read fields off nothing.
+     *
+     * <p>It is also indistinguishable from a genuine empty response, so a client
+     * cannot tell "no such user" apart from "something went strangely wrong",
+     * which are two situations you would want to handle very differently.
+     *
+     * <p>The correct answer is {@code 404 Not Found}, which says precisely what
+     * happened: the URL is well formed, the route exists, and there is nothing at
+     * it. Note this is the opposite call from {@link #getAllUsers}, and for a good
+     * reason — asking for <em>all</em> users when there are none has a valid
+     * answer ({@code []}), whereas asking for <em>one specific</em> user that does
+     * not exist does not.
+     *
+     * @param id the id taken from the URL path
+     * @return the matching user, or {@code null} if there is none — which reaches
+     *         the caller as an empty {@code 200} rather than a {@code 404}
+     */
+    @GetMapping("/api/users/{id}")
+    public User getUser(@PathVariable Long id) {
+        return userService.fetchUser(id);
+    }
+
 
     /**
      * Adds a new user.

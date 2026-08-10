@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Holds the user data and the rules that go with it.
@@ -167,50 +168,61 @@ public class UserService {
     /**
      * Finds the one user carrying the given id.
      *
-     * <p>Walks the list and compares each user's id until one matches. Note that
-     * the comparison uses {@code equals} rather than {@code ==}: both ids are
-     * {@link Long} objects, not plain numbers, and {@code ==} on objects asks
-     * whether they are the <em>same object</em> rather than whether they hold the
-     * same value. For small numbers {@code ==} would appear to work, because Java
-     * caches boxed values from -128 to 127 and hands back the same instance — and
-     * would then start failing once ids passed 127, which is the kind of bug that
-     * survives every test written on a short list.
+     * <h3>Why it returns {@code Optional} rather than the user or {@code null}</h3>
      *
-     * <h3>Returning {@code null} is the weak point</h3>
+     * <p>Not every id belongs to a user, so "there is nothing to return" is a
+     * perfectly ordinary outcome here rather than an error. The question is how to
+     * say so.
      *
-     * <p>When no user matches, this returns {@code null}. The controller passes
-     * that straight back to Spring, which has nothing to serialise and so answers
-     * {@code 200 OK} with an empty body — a failed lookup reported as a success.
-     * The right answer is {@code 404}, and the fix belongs on this side: throwing
-     * a "not found" exception here, rather than returning {@code null}, lets the
-     * web layer turn it into the correct status.
+     * <p>Returning {@code null} says it in a way the compiler cannot see. Nothing
+     * in the signature {@code User fetchUser(Long)} hints that the answer might be
+     * absent, so a caller has to already know, and forgetting produces a
+     * {@code NullPointerException} somewhere further along — or worse, as happened
+     * here, a {@code null} passed straight through to the web layer and served as
+     * an empty {@code 200}.
      *
-     * <p>Returning {@link java.util.Optional} instead would at least make the
-     * "might not be there" part impossible for a caller to overlook, which
-     * {@code null} never does.
+     * <p>{@link Optional} moves that fact into the type. A caller cannot reach the
+     * {@link User} without acknowledging it might not be there, because there is
+     * no way to unwrap an {@code Optional} by accident. The possibility stops
+     * depending on anyone remembering it.
      *
-     * <h3>It searches the whole list every time</h3>
+     * <h3>How the lookup works</h3>
+     *
+     * <p>{@code stream()} walks the list, {@code filter} keeps only users whose id
+     * matches, and {@code findFirst} stops at the first one found. Streams are lazy,
+     * so this does not examine every user and then discard the rest — it stops
+     * walking the moment there is a match, exactly as a loop with an early return
+     * would.
+     *
+     * <p>The comparison uses {@code equals} rather than {@code ==}, which matters
+     * more than it looks. Both ids are {@link Long} objects, not plain numbers, and
+     * {@code ==} on objects asks whether they are the <em>same object</em> rather
+     * than whether they hold the same value. With {@code ==} this would appear to
+     * work, because Java caches boxed values from -128 to 127 and hands back the
+     * same instance for them — and would then start failing once ids passed 127.
+     * That is the kind of bug that survives every test written against a short
+     * list.
+     *
+     * <h3>It still searches the whole list</h3>
      *
      * <p>Cost grows in step with the number of users: a thousand users means up to
-     * a thousand comparisons per request. Irrelevant now, and it disappears on its
-     * own once a database is doing the lookup, since finding a row by primary key
-     * is exactly what a database is built for.
+     * a thousand comparisons per request. Switching from a loop to a stream did not
+     * change that — it is the same walk, written differently. Irrelevant at this
+     * size, and it disappears on its own once a database is doing the lookup, since
+     * finding a row by primary key is exactly what a database is built for.
      *
      * <p>Reading the list while another thread is adding to it carries the same
      * risk described on {@link #userList} — an entry can be missed or seen half
      * written, because nothing coordinates the two.
      *
      * @param id the id to look for; a {@code null} id matches nothing and simply
-     *           falls through the loop
-     * @return the matching user, or {@code null} if no user has that id
+     *           yields an empty result
+     * @return the matching user, or an empty {@link Optional} if no user has that
+     *         id — never {@code null}
      */
-    public User fetchUser(Long id) {
-        for (User user : userList) {
-            if (user.getId().equals(id)) {
-                return user;
-            }
-        }
-
-        return null;
+    public Optional<User> fetchUser(Long id) {
+        return  userList.stream()
+            .filter(user -> user.getId().equals(id))
+            .findFirst();
     }
 }

@@ -70,12 +70,13 @@ import java.util.List;
  *       {@code GET}s reply with JSON; {@code POST} replies with plain text. See
  *       {@link #createUser} for why that is awkward — it is now the most
  *       misleading thing left in the class.</li>
- *   <li><strong>The null check lives in the controller.</strong> {@link #getUser}
- *       asks the service for a user, gets {@code null} back, and turns that into
- *       a {@code 404} itself. It works, but it means the web layer is reasoning
- *       about missing data. Having the service throw a "not found" exception,
- *       translated centrally, would keep that decision in one place instead of
- *       being repeated in every method that looks something up.</li>
+ *   <li><strong>Each lookup decides its own "not found" response.</strong>
+ *       {@link #getUser} maps an empty {@link java.util.Optional} to a
+ *       {@code 404} itself. That is fine for one endpoint and reads well, but the
+ *       same two lines get copied into every future method that looks something
+ *       up. Having the service throw a "not found" exception, translated centrally
+ *       by one exception handler, would state the rule once — and would also give
+ *       the response a body explaining what was missing, which this cannot.</li>
  *   <li><strong>The base path is written out three times.</strong> A single
  *       {@code @RequestMapping("/api/users")} on the class would state it once
  *       and let each method describe only what it adds. Three copies is the
@@ -141,9 +142,28 @@ public class UserController {
      *
      * <h3>A missing user answers 404, not 200</h3>
      *
-     * <p>{@link UserService#fetchUser} returns {@code null} when no user has that
-     * id. This method checks for that and replies {@code 404 Not Found} rather
-     * than passing the {@code null} on. Measured against a running instance:
+     * <p>{@link UserService#fetchUser} hands back an {@link java.util.Optional},
+     * which either holds the user or is empty. The two cases are turned into
+     * responses in one expression:
+     *
+     * <pre>
+     *   return userService.fetchUser(id)
+     *       .map(ResponseEntity::ok)
+     *       .orElseGet(() -&gt; ResponseEntity.notFound().build());
+     * </pre>
+     *
+     * <p>{@code map} runs only when a user was found, wrapping it in a
+     * {@code 200}. {@code orElseGet} supplies the {@code 404} when it was not.
+     *
+     * <p>{@code orElseGet} rather than {@code orElse} is deliberate.
+     * {@code orElse} takes a value, so its argument is built on every call —
+     * including the calls that found a user and will never use it. {@code orElseGet}
+     * takes a function and only calls it when the {@code Optional} is empty. The
+     * cost here is one small object, so it is not about speed; it is that
+     * {@code orElse} silently does work that gets thrown away, and that habit stops
+     * being harmless the moment the fallback is expensive or has side effects.
+     *
+     * <p>Measured against a running instance:
      *
      * <pre>
      *   GET /api/users/1     200  application/json  {"firstName":"Alpha","id":1,...}
@@ -180,10 +200,9 @@ public class UserController {
      */
     @GetMapping("/api/users/{id}")
     public ResponseEntity<User> getUser(@PathVariable Long id) {
-        User user = userService.fetchUser(id);
-        if (user == null)
-            return ResponseEntity.notFound().build();
-        return ResponseEntity.ok(user);
+        return userService.fetchUser(id)
+            .map(ResponseEntity::ok)
+            .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
 

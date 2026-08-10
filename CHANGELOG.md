@@ -98,6 +98,17 @@ empty `[Unreleased]` section is opened above it.
   state their `200` explicitly too; that does not change their behaviour, but it means every endpoint
   in the class declares its status the same way rather than some declaring it and others relying on a
   default.
+- **`UserService.fetchUser` returns `Optional<User>` instead of `null`.** Not every id belongs to a
+  user, so an absent result is an ordinary outcome rather than an error — but nothing in the old
+  signature `User fetchUser(Long)` hinted the answer might be missing, so a caller had to already
+  know.
+
+  That is not hypothetical here: it is exactly how the endpoint originally served an empty `200` for
+  a missing user. The `null` travelled from the service into the web layer unnoticed, because no part
+  of the type system asked anyone to think about it. `Optional` moves that fact into the type, where
+  it cannot be overlooked.
+
+  No behaviour changed — every status and body is identical to before.
 - **`UserService.addUser` returns nothing instead of the full user list.** The controller never read
   the returned list, and a return value nobody reads is a small lie about what a method is for.
 - **⚠️ `POST /api/users` no longer returns JSON.** It previously replied `200 OK` with the full user

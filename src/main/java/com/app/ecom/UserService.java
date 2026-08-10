@@ -163,4 +163,54 @@ public class UserService {
         user.setId(nextId++);
         userList.add(user);
     }
+
+    /**
+     * Finds the one user carrying the given id.
+     *
+     * <p>Walks the list and compares each user's id until one matches. Note that
+     * the comparison uses {@code equals} rather than {@code ==}: both ids are
+     * {@link Long} objects, not plain numbers, and {@code ==} on objects asks
+     * whether they are the <em>same object</em> rather than whether they hold the
+     * same value. For small numbers {@code ==} would appear to work, because Java
+     * caches boxed values from -128 to 127 and hands back the same instance — and
+     * would then start failing once ids passed 127, which is the kind of bug that
+     * survives every test written on a short list.
+     *
+     * <h3>Returning {@code null} is the weak point</h3>
+     *
+     * <p>When no user matches, this returns {@code null}. The controller passes
+     * that straight back to Spring, which has nothing to serialise and so answers
+     * {@code 200 OK} with an empty body — a failed lookup reported as a success.
+     * The right answer is {@code 404}, and the fix belongs on this side: throwing
+     * a "not found" exception here, rather than returning {@code null}, lets the
+     * web layer turn it into the correct status.
+     *
+     * <p>Returning {@link java.util.Optional} instead would at least make the
+     * "might not be there" part impossible for a caller to overlook, which
+     * {@code null} never does.
+     *
+     * <h3>It searches the whole list every time</h3>
+     *
+     * <p>Cost grows in step with the number of users: a thousand users means up to
+     * a thousand comparisons per request. Irrelevant now, and it disappears on its
+     * own once a database is doing the lookup, since finding a row by primary key
+     * is exactly what a database is built for.
+     *
+     * <p>Reading the list while another thread is adding to it carries the same
+     * risk described on {@link #userList} — an entry can be missed or seen half
+     * written, because nothing coordinates the two.
+     *
+     * @param id the id to look for; a {@code null} id matches nothing and simply
+     *           falls through the loop
+     * @return the matching user, or {@code null} if no user has that id
+     */
+    public User fetchUser(Long id) {
+        for (User user : userList) {
+            if (user.getId().equals(id)) {
+                return user;
+            }
+        }
+
+        return null;
+    }
 }

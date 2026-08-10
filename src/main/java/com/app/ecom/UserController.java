@@ -111,13 +111,25 @@ public class UserController {
      * where to find it, so a client that needs the new id has no way to get it
      * short of fetching the whole collection again and guessing.
      *
+     * <p>That gap became sharper once ids started being assigned by the server.
+     * {@link UserService#addUser} now decides the id and writes it onto the user,
+     * so at the moment this method returns, the exact value the caller needs is
+     * sitting right there — and is thrown away in favour of a fixed sentence.
+     *
      * <p>The usual convention is {@code 201 Created}, with the newly created user
      * as the body and a {@code Location} header pointing at it. That is worth
      * changing sooner rather than later: once anything is consuming this endpoint,
      * altering the response shape becomes a breaking change.
      *
-     * <p>Nothing is validated either — a request with no name at all, or with an
-     * id that already exists, is accepted exactly as sent.
+     * <h3>What the caller controls, and what they do not</h3>
+     *
+     * <p>Any {@code id} sent in the request body is <strong>ignored</strong>. The
+     * service overwrites it with the next value in its own sequence, so clients
+     * cannot choose their own ids and cannot collide with an existing one.
+     *
+     * <p>The names, on the other hand, are not checked at all. A request with no
+     * first name, no last name, or empty strings for both is accepted and stored
+     * exactly as sent.
      *
      * @param user the user to add, read from the JSON request body
      * @return a fixed confirmation sentence, sent as {@code text/plain}

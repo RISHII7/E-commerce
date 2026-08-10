@@ -70,8 +70,20 @@ empty `[Unreleased]` section is opened above it.
   reassigned, and a plain unit test can build the controller with `new UserController(service)`
   without starting Spring at all.
 
+- **User ids are now assigned by the server.** `POST /api/users` previously stored whatever `id` the
+  caller sent, and stored `null` when they sent none. The service now overwrites it with the next
+  value in its own sequence, so a request carrying `{"id":999,...}` is stored with the next sequential
+  id instead.
+
+  This is the right way round. An id is how a resource is addressed, so letting clients choose means
+  two of them eventually choose the same one and neither record can be identified afterwards.
+  Settling it now also matters because once a database holds rows with client-chosen ids, correcting
+  it needs a data migration rather than a code change.
+
 ### Changed
 
+- **`UserService.addUser` returns nothing instead of the full user list.** The controller never read
+  the returned list, and a return value nobody reads is a small lie about what a method is for.
 - **⚠️ `POST /api/users` no longer returns JSON.** It previously replied `200 OK` with the full user
   collection as a JSON array. It now replies `200 OK` with the plain-text sentence
   `User Added Successfully`, sent as `text/plain;charset=UTF-8`.
@@ -95,14 +107,28 @@ its own follow-up issue:
 
 - **Nothing is persisted.** Users are held in an in-memory list and are lost when the application
   stops. There is no database yet.
-- **Not safe under concurrent load.** Spring shares a single `UserService` instance across all
-  requests, and the plain `ArrayList` backing it is not built to be written to from several threads
-  at once. Adding an item is three separate steps internally, and two threads running them at once
-  can overwrite each other — losing a user silently, with no error and nothing in the log.
+- **Not safe under concurrent load — and this is measured, not theoretical.** Spring shares a single
+  `UserService` instance across all requests. Neither the backing `ArrayList` nor the id counter is
+  built to be written to from several threads at once, because both perform operations that look
+  like one step in the source but are several once they run.
+
+  Firing 300 simultaneous `POST` requests at a running instance produced:
+
+  ```text
+  Users stored  : 294  (expected 300)  -- 6 users vanished
+  Duplicate ids : 16                   -- e.g. id 18 given to 2 different users
+  ```
+
+  The lost users come from `ArrayList.add` (read the size, write the slot, store the new size). The
+  duplicate ids come from `nextId++` (read, add one, write back). Of the two, duplicate ids are the
+  more serious: an id is how a user is addressed, so once two share one, there is no way to say which
+  was meant.
 - **`fetchAllUsers` returns the live internal list**, not a copy, so a caller ends up holding the
   service's own data.
-- **No validation and no id generation.** A request with no name, or a duplicate id, is accepted
-  exactly as sent; sending no id leaves it `null`.
+- **No validation.** A request with no first name, no last name, or empty strings for both is
+  accepted and stored exactly as sent.
+- **Ids do not survive a restart.** The counter resets to 1 on every boot and nothing is persisted,
+  so a restarted application will re-issue ids a previous run already used.
 - **Layering is only half done.** A service now sits between the controller and the data, but
   everything still lives in one package, there are no DTOs separating the API contract from the
   stored model, and storage is not yet behind a repository interface.

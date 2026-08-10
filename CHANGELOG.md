@@ -57,14 +57,9 @@ empty `[Unreleased]` section is opened above it.
   whole collection and search it themselves. A non-numeric id such as `/api/users/abc` is rejected
   with `400` by the framework before it reaches any application code.
 
-  ⚠️ **A user that does not exist currently returns `200 OK` with an empty body, not `404`.** The
-  lookup returns `null`, Spring has nothing to serialise, and the caller receives a success status
-  for a request that did not succeed — indistinguishable from a genuine empty response. This is
-  documented in the code rather than fixed here, so the endpoint lands as one reviewable change.
-
-  Note this is the opposite call from `GET /api/users`, deliberately: asking for *all* users when
-  there are none has a valid answer (`[]`); asking for *one specific* user that does not exist does
-  not.
+  A user that does not exist returns **`404 Not Found`**. Note this is deliberately the opposite call
+  from `GET /api/users`: asking for *all* users when there are none has a valid answer (`[]`); asking
+  for *one specific* user that does not exist does not.
 - **`POST /api/users`** accepts a JSON body and adds a user, so the listing endpoint can actually be
   exercised. It currently replies `200 OK` with the plain-text sentence `User Added Successfully` —
   see **Changed** below for why that is recorded as interim rather than intended.
@@ -94,6 +89,15 @@ empty `[Unreleased]` section is opened above it.
 
 ### Changed
 
+- **Every endpoint now returns `ResponseEntity`, so each one controls its own status code.**
+  Returning the domain object directly meant a method controlled only the *body* — the status was
+  whatever Spring decided, and that is always `200` unless something throws. There was simply no way
+  to say `404` from a method with that signature.
+
+  This is what made the missing-user fix above possible. `GET /api/users` and `POST /api/users` now
+  state their `200` explicitly too; that does not change their behaviour, but it means every endpoint
+  in the class declares its status the same way rather than some declaring it and others relying on a
+  default.
 - **`UserService.addUser` returns nothing instead of the full user list.** The controller never read
   the returned list, and a return value nobody reads is a small lie about what a method is for.
 - **⚠️ `POST /api/users` no longer returns JSON.** It previously replied `200 OK` with the full user

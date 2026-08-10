@@ -54,25 +54,58 @@ empty `[Unreleased]` section is opened above it.
   *"Show me all users"* is a question with a valid answer when the answer is none, and returning an
   error for it would force every client to special-case something that is not exceptional.
 - **`POST /api/users`** accepts a JSON body and adds a user, so the listing endpoint can actually be
-  exercised. Note that it currently responds `200 OK` and returns the **entire collection** rather
-  than `201 Created` with just the new user — this is recorded as follow-up work rather than
-  presented as the intended final shape.
+  exercised. It currently replies `200 OK` with the plain-text sentence `User Added Successfully` —
+  see **Changed** below for why that is recorded as interim rather than intended.
 - **A `User` model** holding `id`, `firstName` and `lastName`, with Lombok's `@Data` generating the
   getters, setters, `equals`, `hashCode` and `toString`.
+- **A `UserService` layer.** The user collection and the operations on it moved out of the controller
+  into a dedicated `@Service`. `UserController` now handles only HTTP and delegates the actual work.
+
+  The payoff is not tidiness for its own sake: when the database arrives, replacing the in-memory
+  list becomes a change to **one file**. The controller does not know the difference, and neither
+  does any client.
+
+  The service is injected through the constructor — Lombok's `@RequiredArgsConstructor` on a `final`
+  field — rather than with `@Autowired` on the field. That means the dependency can never be null or
+  reassigned, and a plain unit test can build the controller with `new UserController(service)`
+  without starting Spring at all.
+
+### Changed
+
+- **⚠️ `POST /api/users` no longer returns JSON.** It previously replied `200 OK` with the full user
+  collection as a JSON array. It now replies `200 OK` with the plain-text sentence
+  `User Added Successfully`, sent as `text/plain;charset=UTF-8`.
+
+  Two consequences worth stating plainly, because both are recorded as interim rather than intended:
+
+  - **The two endpoints on this path now disagree about content type.** `GET` answers with
+    `application/json`, `POST` with `text/plain`, so a caller cannot parse every response from this
+    API the same way.
+  - **The response tells a program nothing useful.** It confirms something worked, but does not say
+    *which* user was created or where to find it, so a client needing the new id has no way to get it
+    short of re-fetching the whole collection and guessing.
+
+  The intended shape remains `201 Created` with the created user as the body and a `Location` header.
+  Changing it is free right now and stops being free the moment anything consumes this endpoint.
 
 ### Known limitations
 
-These are **deliberate scope limits** on a first vertical slice, not oversights. Each is tracked as
+These are **deliberate scope limits** on an early vertical slice, not oversights. Each is tracked as
 its own follow-up issue:
 
 - **Nothing is persisted.** Users are held in an in-memory list and are lost when the application
   stops. There is no database yet.
-- **Not safe under concurrent load.** Spring shares a single controller instance across all requests,
-  and the plain `ArrayList` backing it is not built to be written to from several threads at once.
+- **Not safe under concurrent load.** Spring shares a single `UserService` instance across all
+  requests, and the plain `ArrayList` backing it is not built to be written to from several threads
+  at once. Adding an item is three separate steps internally, and two threads running them at once
+  can overwrite each other — losing a user silently, with no error and nothing in the log.
+- **`fetchAllUsers` returns the live internal list**, not a copy, so a caller ends up holding the
+  service's own data.
 - **No validation and no id generation.** A request with no name, or a duplicate id, is accepted
   exactly as sent; sending no id leaves it `null`.
-- **No layering.** The controller and model sit in the root package with no service layer between
-  them.
+- **Layering is only half done.** A service now sits between the controller and the data, but
+  everything still lives in one package, there are no DTOs separating the API contract from the
+  stored model, and storage is not yet behind a repository interface.
 
 ---
 

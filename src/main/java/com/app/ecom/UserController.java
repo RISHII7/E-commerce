@@ -2,7 +2,6 @@ package com.app.ecom;
 
 import lombok.RequiredArgsConstructor;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -339,7 +338,7 @@ public class UserController {
      *         has that id
      */
     @PutMapping("/api/users/{id}")
-    public ResponseEntity<String> updateUser(@PathVariable  Long id ,@RequestBody User updatedUser) {
+    public ResponseEntity<String> updateUser(@PathVariable Long id, @RequestBody User updatedUser) {
         boolean updated = userService.updateUser(id, updatedUser);
         if (updated)
             return ResponseEntity.ok("User Updated Successfully");

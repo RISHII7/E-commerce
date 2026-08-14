@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -32,6 +33,29 @@ import java.util.List;
  * matching web requests to it, and it says that whatever a method returns is the
  * response body itself rather than the name of a page to render. Spring converts
  * that return value automatically, which is why no method below mentions JSON.
+ *
+ * <h2>Where the URLs come from</h2>
+ *
+ * <p>{@code @RequestMapping("/api/users")} on the class sets the base path for
+ * every endpoint in it. Each method then declares only the part that is its own,
+ * and Spring joins the two:
+ *
+ * <pre>
+ *   class     @RequestMapping("/api/users")
+ *   method    @GetMapping            -&gt;  GET  /api/users
+ *   method    @GetMapping("/{id}")   -&gt;  GET  /api/users/{id}
+ *   method    @PostMapping           -&gt;  POST /api/users
+ *   method    @PutMapping("/{id}")   -&gt;  PUT  /api/users/{id}
+ * </pre>
+ *
+ * <p>Writing the full path on every method also works and is what this class did
+ * originally. The problem with that is not the repetition itself but what
+ * repetition invites: with the same string in four places, moving the resource
+ * means changing four lines, and missing one leaves a single endpoint stranded at
+ * the old URL. That failure is quiet — the application starts, three endpoints
+ * work, and the fourth returns 404 with nothing to suggest why.
+ *
+ * <p>Stated once, the base path cannot disagree with itself.
  *
  * <h2>Why every method returns {@code ResponseEntity}</h2>
  *
@@ -88,10 +112,6 @@ import java.util.List;
  *       one exception handler, would state the rule once — and would give the
  *       response a body explaining what was missing, which neither of these
  *       can.</li>
- *   <li><strong>The base path is written out four times.</strong> A single
- *       {@code @RequestMapping("/api/users")} on the class would state it once
- *       and let each method describe only what it adds. Four copies is well past
- *       the point where one of them eventually gets edited alone.</li>
  *   <li><strong>Nothing survives a restart</strong>, because the service holds
  *       users in memory. That limitation lives in {@link UserService}, not
  *       here.</li>
@@ -101,6 +121,7 @@ import java.util.List;
  */
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/api/users")
 public class UserController {
 
     /**
@@ -131,7 +152,7 @@ public class UserController {
      *
      * @return {@code 200} with all users, in the order they were added
      */
-    @GetMapping("/api/users")
+    @GetMapping
     public ResponseEntity<List<User>> getAllUsers() {
 
         return ResponseEntity.ok(userService.fetchAllUsers());
@@ -209,7 +230,7 @@ public class UserController {
      * @return {@code 200} with the user, or {@code 404} with an empty body if no
      *         user has that id
      */
-    @GetMapping("/api/users/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<User> getUser(@PathVariable Long id) {
         return userService.fetchUser(id)
             .map(ResponseEntity::ok)
@@ -263,7 +284,7 @@ public class UserController {
      * @return {@code 200} with a fixed confirmation sentence, sent as
      *         {@code text/plain}
      */
-    @PostMapping("/api/users")
+    @PostMapping
     public ResponseEntity<String> createUser(@RequestBody User user) {
         userService.addUser(user);
         return ResponseEntity.ok("User Added Successfully");
@@ -337,7 +358,7 @@ public class UserController {
      * @return {@code 200} with a confirmation sentence, or {@code 404} if no user
      *         has that id
      */
-    @PutMapping("/api/users/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<String> updateUser(@PathVariable Long id, @RequestBody User updatedUser) {
         boolean updated = userService.updateUser(id, updatedUser);
         if (updated)

@@ -60,6 +60,22 @@ empty `[Unreleased]` section is opened above it.
   A user that does not exist returns **`404 Not Found`**. Note this is deliberately the opposite call
   from `GET /api/users`: asking for *all* users when there are none has a valid answer (`[]`); asking
   for *one specific* user that does not exist does not.
+- **`PUT /api/users/{id}`** replaces an existing user's first and last name, so correcting a typo no
+  longer means creating a second user and abandoning the first.
+
+  `PUT` rather than `POST` because the operation is **idempotent** — sending the same request twice
+  leaves the user exactly as one request would, so a client that loses its connection and retries
+  cannot do harm.
+
+  The **URL identifies the user, not the body**: any `id` sent in the body is ignored, so a request
+  cannot move a user to a different id. A missing id returns `404` and changes nothing — it does not
+  quietly create the user, which would put the client back in charge of choosing ids.
+
+  ⚠️ **A request with fields missing erases them.** `PUT /api/users/1` with an empty JSON object sets
+  both names to `null` and answers `200`. Strictly that is what `PUT` means — *make the resource look
+  like this*, not *change these bits* — but since nothing validates the body, a caller who misspells
+  a field name destroys data and is told it worked. Documented in the code rather than discovered by
+  losing someone's data.
 - **`POST /api/users`** accepts a JSON body and adds a user, so the listing endpoint can actually be
   exercised. It currently replies `200 OK` with the plain-text sentence `User Added Successfully` —
   see **Changed** below for why that is recorded as interim rather than intended.

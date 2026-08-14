@@ -225,4 +225,75 @@ public class UserService {
             .filter(user -> user.getId().equals(id))
             .findFirst();
     }
+
+    /**
+     * Overwrites an existing user's names with the ones supplied.
+     *
+     * <p>Finds the user with the given id and copies the first and last name off
+     * {@code updatedUser} onto them. The stored object is edited in place, so
+     * anything already holding a reference to that user sees the new values
+     * immediately — which is fine here, since the list is the only thing holding
+     * one.
+     *
+     * <h3>The id is never changed</h3>
+     *
+     * <p>Only the two name fields are copied across. Whatever id
+     * {@code updatedUser} carries is ignored, so a caller cannot move a user to a
+     * different id by sending one in the body. That matters: an id is how a
+     * record is addressed, and letting a request change it would mean the thing
+     * you asked to edit is no longer at the URL you edited it through.
+     *
+     * <h3>Why it returns a boolean, and why that is a bit thin</h3>
+     *
+     * <p>{@code true} means a user with that id existed and was updated;
+     * {@code false} means no such user, and nothing was changed. The controller
+     * turns those into {@code 200} and {@code 404}.
+     *
+     * <p>It works, but a boolean is a poor way to answer "what happened". It says
+     * only yes or no, so the moment there is a second reason a request might fail
+     * — the names were blank, the user is locked, someone else edited it first —
+     * there is nowhere to put that. Returning the updated user in an
+     * {@link Optional} would say more for the same effort, and would let the
+     * endpoint hand the caller back what it now holds, matching how
+     * {@link #fetchUser} already reports absence.
+     *
+     * <h3>This is a full overwrite, not a partial edit</h3>
+     *
+     * <p>Both names are copied every time, including when the incoming value is
+     * {@code null}. Sending an empty JSON object therefore <strong>wipes both
+     * names</strong> and reports success — verified against a running instance:
+     *
+     * <pre>
+     *   PUT /api/users/1  {}   ->  200
+     *   GET /api/users/1       ->  {"firstName":null,"id":1,"lastName":null}
+     * </pre>
+     *
+     * <p>For {@code PUT} that is arguably correct behaviour, since {@code PUT}
+     * means "make the resource look like this" rather than "change these bits".
+     * The uncomfortable part is that nothing validates the incoming names, so a
+     * caller who misspells a field name silently erases data and is told it
+     * succeeded. Validation is what makes the difference between a deliberate
+     * overwrite and an accidental one.
+     *
+     * <p>Reading and writing the list here carries the same concurrency risk
+     * described on {@link #userList}: two requests updating the same user at once
+     * can interleave, and the second could overwrite the first with no sign that
+     * anything was lost.
+     *
+     * @param id          the id of the user to update, taken from the URL
+     * @param updatedUser the new values; only the names are read, the id is
+     *                    ignored
+     * @return {@code true} if a user with that id was found and updated,
+     *         {@code false} if there was none
+     */
+    public boolean updateUser(Long id, User updatedUser) {
+        return userList.stream()
+            .filter(user -> user.getId().equals(id))
+            .findFirst()
+            .map(existingUser -> {
+                existingUser.setFirstName(updatedUser.getFirstName());
+                existingUser.setLastName(updatedUser.getLastName());
+                return true;
+            }).orElse(false);
+    }
 }

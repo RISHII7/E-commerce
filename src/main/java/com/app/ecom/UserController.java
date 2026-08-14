@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -66,21 +67,32 @@ import java.util.List;
  * <h2>Known rough edges</h2>
  *
  * <ul>
+ *   <li><strong>Nothing is validated.</strong> No endpoint checks the body it is
+ *       given, and {@link #updateUser} is where that stops being harmless: an
+ *       empty JSON object erases both of a user's names and is answered
+ *       {@code 200}. A caller who misspells a field name destroys data and is
+ *       told it worked.</li>
  *   <li><strong>The endpoints disagree about their content type.</strong> Both
- *       {@code GET}s reply with JSON; {@code POST} replies with plain text. See
- *       {@link #createUser} for why that is awkward — it is now the most
- *       misleading thing left in the class.</li>
- *   <li><strong>Each lookup decides its own "not found" response.</strong>
- *       {@link #getUser} maps an empty {@link java.util.Optional} to a
- *       {@code 404} itself. That is fine for one endpoint and reads well, but the
- *       same two lines get copied into every future method that looks something
- *       up. Having the service throw a "not found" exception, translated centrally
- *       by one exception handler, would state the rule once — and would also give
- *       the response a body explaining what was missing, which this cannot.</li>
- *   <li><strong>The base path is written out three times.</strong> A single
+ *       {@code GET}s reply with JSON; {@code POST} and {@code PUT} reply with
+ *       plain text. See {@link #createUser} for why that is awkward.</li>
+ *   <li><strong>Writing endpoints do not return what they wrote.</strong>
+ *       {@link #createUser} and {@link #updateUser} both answer with a fixed
+ *       sentence, so a caller who wants to see the result has to fetch it
+ *       separately — even though the server is holding it at the moment it
+ *       replies.</li>
+ *   <li><strong>Each method decides its own "not found" response.</strong>
+ *       {@link #getUser} and {@link #updateUser} now build a {@code 404} each,
+ *       from different starting points — one from an empty
+ *       {@link java.util.Optional}, the other from a {@code false}. This is the
+ *       second copy, which is exactly when the pattern is worth extracting.
+ *       Having the service throw a "not found" exception, translated centrally by
+ *       one exception handler, would state the rule once — and would give the
+ *       response a body explaining what was missing, which neither of these
+ *       can.</li>
+ *   <li><strong>The base path is written out four times.</strong> A single
  *       {@code @RequestMapping("/api/users")} on the class would state it once
- *       and let each method describe only what it adds. Three copies is the
- *       point at which one of them eventually gets edited alone.</li>
+ *       and let each method describe only what it adds. Four copies is well past
+ *       the point where one of them eventually gets edited alone.</li>
  *   <li><strong>Nothing survives a restart</strong>, because the service holds
  *       users in memory. That limitation lives in {@link UserService}, not
  *       here.</li>
@@ -256,5 +268,81 @@ public class UserController {
     public ResponseEntity<String> createUser(@RequestBody User user) {
         userService.addUser(user);
         return ResponseEntity.ok("User Added Successfully");
+    }
+
+    /**
+     * Replaces an existing user's names.
+     *
+     * <p>Answers {@code PUT /api/users/{id}}. This is the first endpoint that
+     * takes both a path variable and a request body: the {@code id} says
+     * <em>which</em> user to change, and the body says <em>what to change it to</em>.
+     *
+     * <p>{@code PUT} rather than {@code POST} because the operation is
+     * idempotent — sending the same request twice leaves the user in exactly the
+     * same state as sending it once. That is not a technicality: it means a client
+     * that loses the connection and retries cannot do any harm, which is precisely
+     * why {@code PUT} exists as a separate method from {@code POST}.
+     *
+     * <h3>What identifies the user</h3>
+     *
+     * <p>The {@code id} in the URL, and only that. Any id in the request body is
+     * ignored, so {@code PUT /api/users/1} with {@code {"id":555,...}} in the body
+     * still updates user 1 and leaves them as user 1 — verified against a running
+     * instance. Allowing the body to win would mean the resource you edited is no
+     * longer at the URL you edited it through.
+     *
+     * <h3>Responses</h3>
+     *
+     * <pre>
+     *   PUT /api/users/1    {"firstName":"Updated","lastName":"Name"}
+     *                       -&gt; 200  text/plain  User Updated Successfully
+     *   PUT /api/users/999  {"firstName":"Ghost","lastName":"User"}
+     *                       -&gt; 404  (empty body)
+     * </pre>
+     *
+     * <p>The {@code 404} is the same decision as {@link #getUser}: asking to
+     * change a user that does not exist has no sensible successful answer. Note
+     * this endpoint deliberately does <strong>not</strong> create the user in that
+     * case. Some APIs treat {@code PUT} to a missing id as "create it here", which
+     * is defensible, but it sits badly with server-assigned ids — the client would
+     * be choosing the id after all.
+     *
+     * <h3>Careful: an empty body erases both names</h3>
+     *
+     * <p>Both names are overwritten every time, so a request with fields missing
+     * sets them to {@code null} and still reports success:
+     *
+     * <pre>
+     *   PUT /api/users/1  {}   -&gt;  200 User Updated Successfully
+     *   GET /api/users/1       -&gt;  {"firstName":null,"id":1,"lastName":null}
+     * </pre>
+     *
+     * <p>Strictly this is what {@code PUT} is supposed to do — it means "make the
+     * resource look like this", not "change these bits". The problem is that
+     * nothing validates the body, so a caller who misspells a field name wipes
+     * the data and is told it worked. Rejecting blank names would turn that from a
+     * silent accident into a {@code 400}.
+     *
+     * <p>A caller who genuinely wants to change one field without touching the
+     * other is asking for {@code PATCH}, which does not exist here yet.
+     *
+     * <h3>The response body has the same problem as {@link #createUser}</h3>
+     *
+     * <p>It is a plain {@code String}, so this endpoint answers {@code text/plain}
+     * while both {@code GET}s answer JSON. It also does not return the updated
+     * user, so a caller wanting to see the result has to fetch it again.
+     *
+     * @param id          which user to update, taken from the URL path
+     * @param updatedUser the new values, read from the JSON request body; only
+     *                    the names are used
+     * @return {@code 200} with a confirmation sentence, or {@code 404} if no user
+     *         has that id
+     */
+    @PutMapping("/api/users/{id}")
+    public ResponseEntity<String> updateUser(@PathVariable  Long id ,@RequestBody User updatedUser) {
+        boolean updated = userService.updateUser(id, updatedUser);
+        if (updated)
+            return ResponseEntity.ok("User Updated Successfully");
+        return ResponseEntity.notFound().build();
     }
 }
